@@ -1,0 +1,9 @@
+[phases.build]
+cmd = "npm run build"
+
+[phases.start]
+cmd = "npx serve -s dist -l 8080"
+
+[variables]
+NODE_VERSION = "18"
+NPM_CONFIG_PRODUCTION = "false"
