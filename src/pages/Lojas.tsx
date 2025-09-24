@@ -1,18 +1,21 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Switch } from '@/components/ui/switch';
-import { Store, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Trash2, Edit, Plus, FileBarChart, Store } from "lucide-react";
+import { toast } from "sonner";
+import { formatCNPJ } from "@/lib/cnpj-utils";
+import { SearchFilters } from "@/components/SearchFilters";
+import { ReportGenerator } from "@/components/ReportGenerator";
 
 interface Loja {
   id: string;
@@ -23,10 +26,12 @@ interface Loja {
   cnpj_id: string;
   created_at: string;
   updated_at: string;
-  cnpjs: {
-    nome_fantasia: string;
+  cnpj: {
+    id: string;
     cnpj: string;
-    clientes: {
+    nome_fantasia: string;
+    cliente: {
+      id: string;
       nome: string;
     };
   };
@@ -36,14 +41,15 @@ interface CNPJ {
   id: string;
   nome_fantasia: string;
   cnpj: string;
-  clientes: {
+  cliente: {
+    id: string;
     nome: string;
   };
 }
 
 const MARKETPLACES = [
   'shopee',
-  'mercado_livre',
+  'mercado_livre', 
   'tiktok_shop',
   'shein',
   'magalu',
@@ -66,80 +72,126 @@ const MARKETPLACE_LABELS: Record<MarketplaceType, string> = {
 export default function Lojas() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLoja, setEditingLoja] = useState<Loja | null>(null);
-  const [formData, setFormData] = useState<{
-    nome: string;
-    marketplace: MarketplaceType | '';
-    url: string;
-    ativa: boolean;
-    cnpj_id: string;
-  }>({
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [selectedLojaForReport, setSelectedLojaForReport] = useState<Loja | null>(null);
+  
+  // Estados para busca e filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMarketplace, setSelectedMarketplace] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedClient, setSelectedClient] = useState('');
+  
+  const [formData, setFormData] = useState({
+    cnpj_id: '',
     nome: '',
-    marketplace: '',
+    marketplace: '' as MarketplaceType | '',
     url: '',
     ativa: true,
-    cnpj_id: ''
   });
 
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch Lojas
-  const { data: lojas, isLoading: loadingLojas } = useQuery({
+  // Fetch lojas with related data
+  const { data: lojas, isLoading: isLoadingLojas } = useQuery({
     queryKey: ['lojas'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lojas')
         .select(`
           *,
-          cnpjs (
-            nome_fantasia,
+          cnpj:cnpjs(
+            id,
             cnpj,
-            clientes (
+            nome_fantasia,
+            cliente:clientes(
+              id,
               nome
             )
           )
         `)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Loja[];
-    }
+    },
   });
 
   // Fetch CNPJs for dropdown
-  const { data: cnpjs } = useQuery({
+  const { data: cnpjs, isLoading: isLoadingCNPJs } = useQuery({
     queryKey: ['cnpjs'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('cnpjs')
         .select(`
-          id,
-          nome_fantasia,
-          cnpj,
-          clientes (
+          *,
+          cliente:clientes(
+            id,
             nome
           )
         `)
-        .order('nome_fantasia');
-      
+        .order('nome_fantasia', { ascending: true });
+
       if (error) throw error;
       return data as CNPJ[];
-    }
+    },
   });
+
+  // Clientes únicos para filtro
+  const uniqueClients = useMemo(() => {
+    if (!lojas) return [];
+    const clientMap = new Map();
+    lojas.forEach(loja => {
+      if (loja.cnpj?.cliente) {
+        clientMap.set(loja.cnpj.cliente.id, loja.cnpj.cliente);
+      }
+    });
+    return Array.from(clientMap.values());
+  }, [lojas]);
+
+  // Filtrar lojas com base na busca e filtros
+  const filteredLojas = useMemo(() => {
+    if (!lojas) return [];
+
+    return lojas.filter(loja => {
+      // Filtro de busca por texto
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm || 
+        loja.nome.toLowerCase().includes(searchLower) ||
+        loja.cnpj?.cliente?.nome.toLowerCase().includes(searchLower) ||
+        loja.cnpj?.cnpj.includes(searchTerm) ||
+        loja.cnpj?.nome_fantasia.toLowerCase().includes(searchLower);
+
+      // Filtro por marketplace
+      const matchesMarketplace = !selectedMarketplace || loja.marketplace === selectedMarketplace;
+
+      // Filtro por status
+      const matchesStatus = !selectedStatus || loja.ativa.toString() === selectedStatus;
+
+      // Filtro por cliente
+      const matchesClient = !selectedClient || loja.cnpj?.cliente?.id === selectedClient;
+
+      return matchesSearch && matchesMarketplace && matchesStatus && matchesClient;
+    });
+  }, [lojas, searchTerm, selectedMarketplace, selectedStatus, selectedClient]);
 
   // Create/Update Loja mutation
   const saveLojaMutation = useMutation({
-    mutationFn: async (data: Omit<typeof formData, 'marketplace'> & { marketplace: MarketplaceType }) => {
+    mutationFn: async (data: typeof formData) => {
+      const submitData = {
+        ...data,
+        marketplace: data.marketplace as MarketplaceType
+      };
+      
       if (editingLoja) {
         const { error } = await supabase
           .from('lojas')
-          .update(data)
+          .update(submitData)
           .eq('id', editingLoja.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('lojas')
-          .insert([data]);
+          .insert([submitData]);
         if (error) throw error;
       }
     },
@@ -148,17 +200,10 @@ export default function Lojas() {
       setIsDialogOpen(false);
       setEditingLoja(null);
       resetForm();
-      toast({
-        title: editingLoja ? 'Loja atualizada' : 'Loja criada',
-        description: editingLoja ? 'Loja atualizada com sucesso!' : 'Nova loja criada com sucesso!',
-      });
+      toast.success(editingLoja ? 'Loja atualizada com sucesso!' : 'Nova loja criada com sucesso!');
     },
     onError: (error) => {
-      toast({
-        title: 'Erro',
-        description: `Erro ao ${editingLoja ? 'atualizar' : 'criar'} loja: ${error.message}`,
-        variant: 'destructive',
-      });
+      toast.error(`Erro ao ${editingLoja ? 'atualizar' : 'criar'} loja: ${error.message}`);
     }
   });
 
@@ -173,38 +218,31 @@ export default function Lojas() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lojas'] });
-      toast({
-        title: 'Loja excluída',
-        description: 'Loja excluída com sucesso!',
-      });
+      toast.success('Loja excluída com sucesso!');
     },
     onError: (error) => {
-      toast({
-        title: 'Erro',
-        description: `Erro ao excluir loja: ${error.message}`,
-        variant: 'destructive',
-      });
+      toast.error(`Erro ao excluir loja: ${error.message}`);
     }
   });
 
   const resetForm = () => {
     setFormData({
+      cnpj_id: '',
       nome: '',
       marketplace: '',
       url: '',
       ativa: true,
-      cnpj_id: ''
     });
   };
 
   const handleEdit = (loja: Loja) => {
     setEditingLoja(loja);
     setFormData({
+      cnpj_id: loja.cnpj_id,
       nome: loja.nome,
       marketplace: loja.marketplace as MarketplaceType,
       url: loja.url || '',
       ativa: loja.ativa,
-      cnpj_id: loja.cnpj_id
     });
     setIsDialogOpen(true);
   };
@@ -212,24 +250,24 @@ export default function Lojas() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.marketplace || !formData.cnpj_id) {
-      toast({
-        title: 'Erro',
-        description: 'Por favor, preencha todos os campos obrigatórios.',
-        variant: 'destructive',
-      });
+    if (!formData.cnpj_id || !formData.nome || !formData.marketplace) {
+      toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
 
-    saveLojaMutation.mutate({
-      ...formData,
-      marketplace: formData.marketplace as MarketplaceType
-    });
+    saveLojaMutation.mutate(formData);
   };
 
-  const formatCNPJ = (cnpj: string) => {
-    const numbers = cnpj.replace(/\D/g, '');
-    return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedMarketplace('');
+    setSelectedStatus('');
+    setSelectedClient('');
+  };
+
+  const handleOpenReportDialog = (loja: Loja) => {
+    setSelectedLojaForReport(loja);
+    setIsReportDialogOpen(true);
   };
 
   return (
@@ -271,7 +309,7 @@ export default function Lojas() {
                   <SelectContent>
                     {cnpjs?.map((cnpj) => (
                       <SelectItem key={cnpj.id} value={cnpj.id}>
-                        {cnpj.nome_fantasia} - {formatCNPJ(cnpj.cnpj)} ({cnpj.clientes.nome})
+                        {cnpj.nome_fantasia} - {formatCNPJ(cnpj.cnpj)} ({cnpj.cliente.nome})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -341,18 +379,41 @@ export default function Lojas() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Store className="h-5 w-5" />
-            Lista de Lojas
-          </CardTitle>
-          <CardDescription>
-            Lojas cadastradas no sistema
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Store className="h-5 w-5" />
+                Lojas Cadastradas
+              </CardTitle>
+              <CardDescription>
+                {filteredLojas?.length || 0} loja(s) encontrada(s)
+              </CardDescription>
+            </div>
+          </div>
+          <SearchFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedMarketplace={selectedMarketplace}
+            setSelectedMarketplace={setSelectedMarketplace}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            selectedClient={selectedClient}
+            setSelectedClient={setSelectedClient}
+            clients={uniqueClients}
+            onClearFilters={handleClearFilters}
+          />
         </CardHeader>
         <CardContent>
-          {loadingLojas ? (
-            <div className="text-center py-4">Carregando...</div>
-          ) : lojas && lojas.length > 0 ? (
+          {isLoadingLojas ? (
+            <div className="text-center py-4">Carregando lojas...</div>
+          ) : !filteredLojas || filteredLojas.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {searchTerm || selectedMarketplace || selectedStatus || selectedClient 
+                ? "Nenhuma loja encontrada com os filtros aplicados." 
+                : "Nenhuma loja cadastrada ainda."
+              }
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -365,23 +426,23 @@ export default function Lojas() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lojas.map((loja) => (
+                {filteredLojas?.map((loja) => (
                   <TableRow key={loja.id}>
                     <TableCell className="font-medium">
-                      {loja.cnpjs.clientes.nome}
+                      {loja.cnpj?.cliente?.nome}
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{loja.cnpjs.nome_fantasia}</div>
+                        <div className="font-medium">{loja.cnpj?.nome_fantasia}</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatCNPJ(loja.cnpjs.cnpj)}
+                          {formatCNPJ(loja.cnpj?.cnpj || '')}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{loja.nome}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">
-                        {MARKETPLACE_LABELS[loja.marketplace]}
+                        {MARKETPLACE_LABELS[loja.marketplace as MarketplaceType]}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -394,13 +455,22 @@ export default function Lojas() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(loja)}
+                          onClick={() => handleOpenReportDialog(loja)}
+                          title="Gerar Relatório"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <FileBarChart className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(loja)}
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" title="Excluir">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -408,15 +478,12 @@ export default function Lojas() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Tem certeza que deseja excluir esta loja? Esta ação não pode ser desfeita.
+                                Tem certeza que deseja excluir a loja "{loja.nome}"? Esta ação não pode ser desfeita.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteLojaMutation.mutate(loja.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
+                              <AlertDialogAction onClick={() => deleteLojaMutation.mutate(loja.id)}>
                                 Excluir
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -428,21 +495,21 @@ export default function Lojas() {
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <div className="text-center py-8">
-              <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold">Nenhuma loja encontrada</h3>
-              <p className="text-muted-foreground mb-4">
-                Comece criando sua primeira loja
-              </p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Loja
-              </Button>
-            </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog de Geração de Relatório */}
+      {selectedLojaForReport && (
+        <ReportGenerator
+          loja={selectedLojaForReport}
+          isOpen={isReportDialogOpen}
+          onClose={() => {
+            setIsReportDialogOpen(false);
+            setSelectedLojaForReport(null);
+          }}
+        />
+      )}
     </div>
   );
 }
