@@ -137,10 +137,10 @@ export default function Dashboard() {
 
   if (statsLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 animate-fadeIn">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array(4).fill(0).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="border-primary/20">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-4 w-4" />
@@ -157,81 +157,119 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Visão geral dos seus dados de marketplace
-        </p>
+    <div className="space-y-8 animate-fadeIn">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gaming-gradient bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Visão geral dos seus marketplaces e performance
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <TrendingUp className="h-4 w-4" />
+          Atualizado agora
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+      {/* KPI Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="relative overflow-hidden border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+          <div className="absolute inset-0 bg-gaming-gradient-subtle opacity-20"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground">
+              Clientes
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Users className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.clientes}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-primary">{stats?.clientes}</div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+              <Users className="h-3 w-3" />
               Total de clientes cadastrados
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lojas</CardTitle>
-            <Store className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-lg hover:shadow-accent/10">
+          <div className="absolute inset-0 bg-accent/5"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground">
+              Lojas
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-accent/10">
+              <Store className="h-4 w-4 text-accent" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.lojas}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-accent">{stats?.lojas}</div>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+              <Store className="h-3 w-3" />
               Lojas ativas nos marketplaces
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
+          <div className="absolute inset-0 bg-gaming-gradient-subtle opacity-20"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground">
+              Faturamento Total
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-primary/10">
+              <DollarSign className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-primary">
               R$ {stats?.totalFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+              <TrendingUp className="h-3 w-3" />
               Receita acumulada
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ROAS Médio</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-lg hover:shadow-accent/10">
+          <div className="absolute inset-0 bg-accent/5"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-foreground">
+              ROAS Médio
+            </CardTitle>
+            <div className="p-2 rounded-lg bg-accent/10">
+              <TrendingUp className="h-4 w-4 text-accent" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold text-accent">
               {stats?.roasGlobal.toFixed(2)}x
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+              <TrendingUp className="h-3 w-3" />
               Retorno sobre investimento
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Evolução Mensal</CardTitle>
+      {/* Charts Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-primary/20 hover:border-primary/30 transition-all duration-300">
+          <CardHeader className="border-b border-border/50">
+            <CardTitle className="flex items-center gap-2">
+              <div className="w-2 h-8 bg-gaming-gradient rounded-full"></div>
+              Evolução Mensal
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {monthlyLoading ? (
               <Skeleton className="h-80 w-full" />
-            ) : (
+            ) : monthlyData && monthlyData.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={monthlyData}>
@@ -256,18 +294,31 @@ export default function Dashboard() {
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
+            ) : (
+              <div className="h-80 flex flex-col items-center justify-center text-muted-foreground space-y-4">
+                <div className="p-4 rounded-full bg-muted/20">
+                  <BarChart3 className="h-8 w-8" />
+                </div>
+                <div className="text-center">
+                  <p className="font-medium">Sem dados para mostrar</p>
+                  <p className="text-sm">Cadastre dados mensais para ver os gráficos</p>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Distribuição por Marketplace</CardTitle>
+        <Card className="border-accent/20 hover:border-accent/30 transition-all duration-300">
+          <CardHeader className="border-b border-border/50">
+            <CardTitle className="flex items-center gap-2">
+              <div className="w-2 h-8 bg-accent rounded-full"></div>
+              Distribuição por Marketplace
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {marketplaceLoading ? (
               <Skeleton className="h-80 w-full" />
-            ) : (
+            ) : marketplaceData && marketplaceData.length > 0 ? (
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -294,10 +345,49 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
+            ) : (
+              <div className="h-80 flex flex-col items-center justify-center text-muted-foreground space-y-4">
+                <div className="p-4 rounded-full bg-muted/20">
+                  <BarChart3 className="h-8 w-8" />
+                </div>
+                <div className="text-center">
+                  <p className="font-medium">Sem dados para mostrar</p>
+                  <p className="text-sm">Cadastre lojas para ver a distribuição</p>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Actions */}
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="w-2 h-8 bg-gaming-gradient rounded-full"></div>
+            Ações Rápidas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-lg border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer hover:bg-primary/5 group">
+              <Users className="h-6 w-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold">Cadastrar Cliente</h3>
+              <p className="text-sm text-muted-foreground">Adicione um novo cliente ao sistema</p>
+            </div>
+            <div className="p-4 rounded-lg border border-accent/20 hover:border-accent/40 transition-colors cursor-pointer hover:bg-accent/5 group">
+              <Building2 className="h-6 w-6 text-accent mb-2 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold">Adicionar CNPJ</h3>
+              <p className="text-sm text-muted-foreground">Registre CNPJs dos seus clientes</p>
+            </div>
+            <div className="p-4 rounded-lg border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer hover:bg-primary/5 group">
+              <Store className="h-6 w-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold">Criar Loja</h3>
+              <p className="text-sm text-muted-foreground">Configure lojas nos marketplaces</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
