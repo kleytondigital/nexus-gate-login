@@ -1,12 +1,22 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import LoginPage from '@/components/ui/gaming-login';
 
 const Index = () => {
+  const handleLogin = (email: string, password: string, remember: boolean) => {
+    console.log('Login attempt:', { email, password, remember });
+    // Here you would typically handle the actual login logic
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-12">
+      <LoginPage.VideoBackground videoUrl="https://videos.pexels.com/video-files/8128311/8128311-uhd_2560_1440_25fps.mp4" />
+
+      <div className="relative z-20 w-full max-w-md animate-fadeIn">
+        <LoginPage.LoginForm onSubmit={handleLogin} />
       </div>
+
+      <footer className="absolute bottom-4 left-0 right-0 text-center text-white/60 text-sm z-20">
+        © 2025 NexusGate. All rights reserved.
+      </footer>
     </div>
   );
 };
