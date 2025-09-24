@@ -16,10 +16,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { isValidCNPJ, formatCNPJ, cleanCNPJ } from '@/lib/cnpj-utils';
 
 const clienteSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  cnpj_principal: z.string().min(14, 'CNPJ deve ter 14 dígitos'),
+  cnpj_principal: z.string()
+    .min(14, 'CNPJ deve ter 14 dígitos')
+    .refine((cnpj) => isValidCNPJ(cnpj), 'CNPJ inválido'),
   email: z.string().email('Email inválido'),
   telefone: z.string().optional(),
   endereco: z.string().optional(),
@@ -69,18 +72,21 @@ export default function Clientes() {
   const createMutation = useMutation({
     mutationFn: async (data: ClienteForm) => {
       const user = await supabase.auth.getUser();
-      const { error } = await supabase
-        .from('clientes')
-        .insert({
-          nome: data.nome,
-          cnpj_principal: data.cnpj_principal,
-          email: data.email,
-          telefone: data.telefone || null,
-          endereco: data.endereco || null,
-          created_by: user.data.user?.id!
-        });
+      if (!user.data.user?.id) throw new Error('Usuário não autenticado');
+
+      const cleanedCNPJ = cleanCNPJ(data.cnpj_principal);
       
-      if (error) throw error;
+      // Inicia uma transação usando uma função RPC
+      const { data: clienteData, error: clienteError } = await supabase.rpc('create_cliente_with_cnpj', {
+        p_nome: data.nome,
+        p_cnpj_principal: cleanedCNPJ,
+        p_email: data.email,
+        p_telefone: data.telefone || null,
+        p_endereco: data.endereco || null,
+        p_created_by: user.data.user.id
+      });
+      
+      if (clienteError) throw clienteError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
@@ -99,10 +105,17 @@ export default function Clientes() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: ClienteForm }) => {
-      const { error } = await supabase
-        .from('clientes')
-        .update(data)
-        .eq('id', id);
+      const cleanedCNPJ = cleanCNPJ(data.cnpj_principal);
+      
+      // Atualiza cliente e CNPJ principal usando função RPC
+      const { error } = await supabase.rpc('update_cliente_with_cnpj', {
+        p_cliente_id: id,
+        p_nome: data.nome,
+        p_cnpj_principal: cleanedCNPJ,
+        p_email: data.email,
+        p_telefone: data.telefone || null,
+        p_endereco: data.endereco || null
+      });
       
       if (error) throw error;
     },
@@ -215,7 +228,15 @@ export default function Clientes() {
                     <FormItem>
                       <FormLabel>CNPJ Principal</FormLabel>
                       <FormControl>
-                        <Input placeholder="00.000.000/0000-00" {...field} />
+                        <Input 
+                          placeholder="00.000.000/0000-00" 
+                          {...field}
+                          onChange={(e) => {
+                            const formatted = formatCNPJ(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                          maxLength={18}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -304,7 +325,7 @@ export default function Clientes() {
                   <div>
                     <CardTitle className="text-lg">{cliente.nome}</CardTitle>
                     <Badge variant="secondary" className="mt-1">
-                      {cliente.cnpj_principal}
+                      {formatCNPJ(cliente.cnpj_principal)}
                     </Badge>
                   </div>
                   <div className="flex gap-1">
