@@ -223,6 +223,62 @@ export type Database = {
         }
         Relationships: []
       }
+      user_cliente_access: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          granted_by: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          granted_by: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          granted_by?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_cliente_access_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -238,6 +294,18 @@ export type Database = {
           p_telefone: string
         }
         Returns: string
+      }
+      get_user_role: {
+        Args: { check_user_id?: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      has_client_access: {
+        Args: { check_cliente_id: string; check_user_id?: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { check_user_id?: string }
+        Returns: boolean
       }
       update_cliente_with_cnpj: {
         Args: {
@@ -261,6 +329,7 @@ export type Database = {
         | "magalu"
         | "amazon"
         | "outros"
+      user_role: "admin" | "gerente" | "assistente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -398,6 +467,7 @@ export const Constants = {
         "amazon",
         "outros",
       ],
+      user_role: ["admin", "gerente", "assistente"],
     },
   },
 } as const
