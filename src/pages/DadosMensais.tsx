@@ -186,8 +186,6 @@ export default function DadosMensais() {
         investimento_ads: investimento,
         itens_vendidos: parseInt(data.itens_vendidos),
         tipo_campanha: data.tipo_campanha,
-        roas: metrics.roas,
-        acos: metrics.acos,
         observacoes: data.observacoes || null
       };
 
