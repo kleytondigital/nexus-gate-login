@@ -14,7 +14,215 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clientes: {
+        Row: {
+          cnpj_principal: string
+          created_at: string
+          created_by: string
+          email: string
+          endereco: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cnpj_principal: string
+          created_at?: string
+          created_by: string
+          email: string
+          endereco?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cnpj_principal?: string
+          created_at?: string
+          created_by?: string
+          email?: string
+          endereco?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clientes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cnpjs: {
+        Row: {
+          cliente_id: string
+          cnpj: string
+          created_at: string
+          endereco: string | null
+          id: string
+          nome_fantasia: string
+          razao_social: string
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          cnpj: string
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome_fantasia: string
+          razao_social: string
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          cnpj?: string
+          created_at?: string
+          endereco?: string | null
+          id?: string
+          nome_fantasia?: string
+          razao_social?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cnpjs_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dados_mensais: {
+        Row: {
+          acos: number | null
+          ano: number
+          created_at: string
+          faturamento_bruto: number
+          id: string
+          investimento_ads: number
+          itens_vendidos: number
+          loja_id: string
+          mes: number
+          observacoes: string | null
+          roas: number | null
+          tipo_campanha: Database["public"]["Enums"]["campaign_type"]
+          updated_at: string
+        }
+        Insert: {
+          acos?: number | null
+          ano: number
+          created_at?: string
+          faturamento_bruto?: number
+          id?: string
+          investimento_ads?: number
+          itens_vendidos?: number
+          loja_id: string
+          mes: number
+          observacoes?: string | null
+          roas?: number | null
+          tipo_campanha?: Database["public"]["Enums"]["campaign_type"]
+          updated_at?: string
+        }
+        Update: {
+          acos?: number | null
+          ano?: number
+          created_at?: string
+          faturamento_bruto?: number
+          id?: string
+          investimento_ads?: number
+          itens_vendidos?: number
+          loja_id?: string
+          mes?: number
+          observacoes?: string | null
+          roas?: number | null
+          tipo_campanha?: Database["public"]["Enums"]["campaign_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dados_mensais_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lojas: {
+        Row: {
+          ativa: boolean
+          cnpj_id: string
+          created_at: string
+          id: string
+          marketplace: Database["public"]["Enums"]["marketplace_type"]
+          nome: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          ativa?: boolean
+          cnpj_id: string
+          created_at?: string
+          id?: string
+          marketplace: Database["public"]["Enums"]["marketplace_type"]
+          nome: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          ativa?: boolean
+          cnpj_id?: string
+          created_at?: string
+          id?: string
+          marketplace?: Database["public"]["Enums"]["marketplace_type"]
+          nome?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lojas_cnpj_id_fkey"
+            columns: ["cnpj_id"]
+            isOneToOne: false
+            referencedRelation: "cnpjs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +231,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      campaign_type: "organica" | "paga" | "ambas"
+      marketplace_type:
+        | "shopee"
+        | "mercado_livre"
+        | "tiktok_shop"
+        | "shein"
+        | "magalu"
+        | "amazon"
+        | "outros"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +366,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      campaign_type: ["organica", "paga", "ambas"],
+      marketplace_type: [
+        "shopee",
+        "mercado_livre",
+        "tiktok_shop",
+        "shein",
+        "magalu",
+        "amazon",
+        "outros",
+      ],
+    },
   },
 } as const
