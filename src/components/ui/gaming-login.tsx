@@ -134,21 +134,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                 <h2 className="text-3xl font-bold mb-2 relative group">
                     <span className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse"></span>
                     <span className="relative inline-block text-3xl font-bold mb-2 text-white">
-                        NexusGate
+                        B2X Sistemas
                     </span>
                     <span className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-accent/20 blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300"></span>
                 </h2>
                 <p className="text-white/80 flex flex-col items-center space-y-1">
                     <span className="relative group cursor-default">
                         <span className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-                        <span className="relative inline-block animate-pulse">Your gaming universe awaits</span>
+                        <span className="relative inline-block animate-pulse">Experiência em gestão de market places</span>
                     </span>
                     <span className="text-xs text-white/50 animate-pulse">
-                        [Press Enter to join the adventure]
+                        Faça parte da equipe
                     </span>
                     <div className="flex space-x-2 text-xs text-white/40">
                         <span className="animate-pulse">⚔️</span>
-                        <span className="animate-bounce">🎮</span>
+                        <span className="animate-bounce">😎</span>
                         <span className="animate-pulse">🏆</span>
                     </div>
                 </p>
@@ -197,11 +197,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                             className="text-sm text-white/80 cursor-pointer hover:text-white transition-colors"
                             onClick={() => setRemember(!remember)}
                         >
-                            Remember me
+                            Lembrar-me
                         </label>
                     </div>
                     <a href="#" className="text-sm text-white/80 hover:text-white transition-colors">
-                        Forgot password?
+                        Recuperar Senha?
                     </a>
                 </div>
 
@@ -221,7 +221,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                 <div className="relative flex items-center justify-center">
                     <div className="border-t border-white/10 absolute w-full"></div>
                     <div className="bg-transparent px-4 relative text-white/60 text-sm">
-                        quick access via
+                        Acesso com um click
                     </div>
                 </div>
 
@@ -233,9 +233,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
             </div>
 
             <p className="mt-8 text-center text-sm text-white/60">
-                Don't have an account?{' '}
+                Não tem conta?{' '}
                 <a href="#" className="font-medium text-white hover:text-accent transition-colors">
-                    Create Account
+                    Crie sua conta aqui
                 </a>
             </p>
         </div>
