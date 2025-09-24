@@ -13,6 +13,7 @@ import Clientes from "./pages/Clientes";
 import CNPJs from "./pages/CNPJs";
 import Lojas from "./pages/Lojas";
 import DadosMensais from "./pages/DadosMensais";
+import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,13 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <DadosMensais />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/gerenciar-usuarios" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <GerenciarUsuarios />
                 </AppLayout>
               </ProtectedRoute>
             } />

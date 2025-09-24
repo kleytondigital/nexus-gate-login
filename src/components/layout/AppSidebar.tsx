@@ -15,7 +15,7 @@ import {
   Building2,
   Store,
   TrendingUp,
-  Plus,
+  UserCog,
   LogOut,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -47,6 +47,11 @@ const menuItems = [
     title: 'Dados Mensais',
     icon: TrendingUp,
     url: '/dados-mensais',
+  },
+  {
+    title: 'Gerenciar Usuários',
+    icon: UserCog,
+    url: '/gerenciar-usuarios',
   },
 ];
 

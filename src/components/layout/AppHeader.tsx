@@ -10,6 +10,7 @@ const routeNames: Record<string, string> = {
   '/cnpjs': 'CNPJs',
   '/lojas': 'Lojas',
   '/dados-mensais': 'Dados Mensais',
+  '/gerenciar-usuarios': 'Gerenciar Usuários',
 };
 
 export function AppHeader() {
