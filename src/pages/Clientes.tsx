@@ -76,17 +76,19 @@ export default function Clientes() {
 
       const cleanedCNPJ = cleanCNPJ(data.cnpj_principal);
       
-      // Inicia uma transação usando uma função RPC
-      const { data: clienteData, error: clienteError } = await supabase.rpc('create_cliente_with_cnpj', {
-        p_nome: data.nome,
-        p_cnpj_principal: cleanedCNPJ,
-        p_email: data.email,
-        p_telefone: data.telefone || null,
-        p_endereco: data.endereco || null,
-        p_created_by: user.data.user.id
-      });
+      // Criar cliente e CNPJ automaticamente usando RPC
+      const { data: result, error } = await supabase
+        .rpc('create_cliente_with_cnpj', {
+          p_nome: data.nome,
+          p_cnpj_principal: cleanedCNPJ,
+          p_email: data.email,
+          p_telefone: data.telefone || null,
+          p_endereco: data.endereco || null,
+          p_created_by: user.data.user.id
+        });
       
-      if (clienteError) throw clienteError;
+      if (error) throw error;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
@@ -107,15 +109,16 @@ export default function Clientes() {
     mutationFn: async ({ id, data }: { id: string; data: ClienteForm }) => {
       const cleanedCNPJ = cleanCNPJ(data.cnpj_principal);
       
-      // Atualiza cliente e CNPJ principal usando função RPC
-      const { error } = await supabase.rpc('update_cliente_with_cnpj', {
-        p_cliente_id: id,
-        p_nome: data.nome,
-        p_cnpj_principal: cleanedCNPJ,
-        p_email: data.email,
-        p_telefone: data.telefone || null,
-        p_endereco: data.endereco || null
-      });
+      // Atualizar cliente e CNPJ usando RPC
+      const { error } = await supabase
+        .rpc('update_cliente_with_cnpj', {
+          p_cliente_id: id,
+          p_nome: data.nome,
+          p_cnpj_principal: cleanedCNPJ,
+          p_email: data.email,
+          p_telefone: data.telefone || null,
+          p_endereco: data.endereco || null
+        });
       
       if (error) throw error;
     },
