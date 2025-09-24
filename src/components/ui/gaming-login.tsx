@@ -158,7 +158,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                 <FormInput
                     icon={<Mail className="text-white/60" size={18} />}
                     type="email"
-                    placeholder="Email address"
+                    placeholder="Seu Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -168,7 +168,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     <FormInput
                         icon={<Lock className="text-white/60" size={18} />}
                         type={showPassword ? "text" : "password"}
-                        placeholder="Password"
+                        placeholder="Senha"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -213,7 +213,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                             : 'bg-primary hover:bg-primary/90'
                         } text-white font-medium transition-all duration-200 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-primary/20 hover:shadow-primary/40`}
                 >
-                    {isSubmitting ? 'Logging in...' : 'Enter NexusGate'}
+                    {isSubmitting ? 'Acessando...' : 'Acessar B2X'}
                 </button>
             </form>
 
@@ -228,7 +228,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                 <div className="mt-6 grid grid-cols-3 gap-3">
                     <SocialButton icon={<Chrome size={18} />} name="Chrome" />
                     <SocialButton icon={<Twitter size={18} />} name="X" />
-                    <SocialButton icon={<Gamepad2 size={18} />} name="Steam" />
                 </div>
             </div>
 
