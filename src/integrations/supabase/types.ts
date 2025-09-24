@@ -228,7 +228,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_cliente_with_cnpj: {
+        Args: {
+          p_cnpj_principal: string
+          p_created_by: string
+          p_email: string
+          p_endereco: string
+          p_nome: string
+          p_telefone: string
+        }
+        Returns: string
+      }
+      update_cliente_with_cnpj: {
+        Args: {
+          p_cliente_id: string
+          p_cnpj_principal: string
+          p_email: string
+          p_endereco: string
+          p_nome: string
+          p_telefone: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       campaign_type: "organica" | "paga" | "ambas"
