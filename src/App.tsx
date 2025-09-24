@@ -10,6 +10,9 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Clientes from "./pages/Clientes";
+import CNPJs from "./pages/CNPJs";
+import Lojas from "./pages/Lojas";
+import DadosMensais from "./pages/DadosMensais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,27 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <Clientes />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/cnpjs" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <CNPJs />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/lojas" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Lojas />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dados-mensais" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <DadosMensais />
                 </AppLayout>
               </ProtectedRoute>
             } />
