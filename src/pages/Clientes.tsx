@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Pencil, Trash2, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, FileText } from 'lucide-react';
+import { ClientReportGenerator } from '@/components/ClientReportGenerator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,6 +44,7 @@ interface Cliente {
 export default function Clientes() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [reportClienteId, setReportClienteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const form = useForm<ClienteForm>({
@@ -184,6 +186,14 @@ export default function Clientes() {
     setEditingCliente(null);
     form.reset();
     setIsDialogOpen(true);
+  };
+
+  const handleOpenReport = (cliente: Cliente) => {
+    setReportClienteId(cliente.id);
+  };
+
+  const handleCloseReport = () => {
+    setReportClienteId(null);
   };
 
   return (
@@ -335,6 +345,14 @@ export default function Clientes() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => handleOpenReport(cliente)}
+                      title="Relatório Consolidado"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleEdit(cliente)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -387,6 +405,19 @@ export default function Clientes() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Modal de Relatório Consolidado */}
+      {reportClienteId && (
+        <ClientReportGenerator
+          cliente={{
+            id: reportClienteId,
+            nome: clientes?.find(c => c.id === reportClienteId)?.nome || '',
+            cnpj_principal: clientes?.find(c => c.id === reportClienteId)?.cnpj_principal || ''
+          }}
+          isOpen={!!reportClienteId}
+          onClose={handleCloseReport}
+        />
       )}
     </div>
   );
