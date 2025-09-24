@@ -340,7 +340,7 @@ export default function Clientes() {
                     </div>
                   )}
                   <div className="text-xs text-muted-foreground mt-2">
-                    Criado em {format(new Date(cliente.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                    Criado em {cliente.created_at ? format(new Date(cliente.created_at), 'dd/MM/yyyy', { locale: ptBR }) : 'Data não disponível'}
                   </div>
                 </div>
               </CardContent>
