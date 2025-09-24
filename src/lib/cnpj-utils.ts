@@ -2,7 +2,12 @@
  * Validação e formatação de CNPJ
  */
 
-export function formatCNPJ(cnpj: string): string {
+export function formatCNPJ(cnpj: string | null | undefined): string {
+  // Verificar se cnpj existe
+  if (!cnpj) {
+    return '';
+  }
+  
   // Remove caracteres não numéricos
   const numericCNPJ = cnpj.replace(/\D/g, '');
   
@@ -17,11 +22,18 @@ export function formatCNPJ(cnpj: string): string {
   return cnpj;
 }
 
-export function cleanCNPJ(cnpj: string): string {
+export function cleanCNPJ(cnpj: string | null | undefined): string {
+  if (!cnpj) {
+    return '';
+  }
   return cnpj.replace(/\D/g, '');
 }
 
-export function isValidCNPJ(cnpj: string): boolean {
+export function isValidCNPJ(cnpj: string | null | undefined): boolean {
+  if (!cnpj) {
+    return false;
+  }
+  
   const numericCNPJ = cleanCNPJ(cnpj);
   
   // Verifica se tem 14 dígitos
