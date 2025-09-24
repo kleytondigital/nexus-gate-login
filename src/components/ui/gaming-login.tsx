@@ -1,9 +1,10 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Mail, Lock, Chrome, Twitter, Gamepad2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Chrome, Twitter, Gamepad2, User } from 'lucide-react';
 
 interface LoginFormProps {
     onSubmit: (email: string, password: string, remember: boolean) => void;
+    onSignup?: (email: string, password: string, name?: string) => void;
 }
 
 interface VideoBackgroundProps {
@@ -107,13 +108,15 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({ videoUrl }) => {
 };
 
 // Main LoginForm Component
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, onSignup }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [remember, setRemember] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isLogin, setIsLogin] = useState(true);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -123,13 +126,43 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         setIsSuccess(true);
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        onSubmit(email, password, remember);
+        if (isLogin) {
+            onSubmit(email, password, remember);
+        } else if (onSignup) {
+            onSignup(email, password, name);
+        }
         setIsSubmitting(false);
         setIsSuccess(false);
     };
 
     return (
         <div className="p-8 rounded-2xl backdrop-blur-sm bg-black/50 border border-white/10">
+            {/* Tabs para Login/Signup */}
+            <div className="flex mb-6 bg-white/5 rounded-lg p-1">
+                <button
+                    type="button"
+                    onClick={() => setIsLogin(true)}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                        isLogin 
+                            ? 'bg-primary text-white shadow-lg' 
+                            : 'text-white/70 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                    Entrar
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setIsLogin(false)}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                        !isLogin 
+                            ? 'bg-primary text-white shadow-lg' 
+                            : 'text-white/70 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                    Registrar
+                </button>
+            </div>
+
             <div className="mb-8 text-center">
                 <h2 className="text-3xl font-bold mb-2 relative group">
                     <span className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse"></span>
@@ -144,7 +177,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                         <span className="relative inline-block animate-pulse">Experiência em gestão de market places</span>
                     </span>
                     <span className="text-xs text-white/50 animate-pulse">
-                        Faça parte da equipe
+                        {isLogin ? 'Faça parte da equipe' : 'Crie sua conta agora'}
                     </span>
                     <div className="flex space-x-2 text-xs text-white/40">
                         <span className="animate-pulse">⚔️</span>
@@ -155,6 +188,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+                {!isLogin && (
+                    <FormInput
+                        icon={<User className="text-white/60" size={18} />}
+                        type="text"
+                        placeholder="Nome Completo"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                )}
+
                 <FormInput
                     icon={<Mail className="text-white/60" size={18} />}
                     type="email"
@@ -183,27 +227,29 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <div onClick={() => setRemember(!remember)} className="cursor-pointer">
-                            <ToggleSwitch
-                                checked={remember}
-                                onChange={() => setRemember(!remember)}
-                                id="remember-me"
-                            />
+                {isLogin && (
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                            <div onClick={() => setRemember(!remember)} className="cursor-pointer">
+                                <ToggleSwitch
+                                    checked={remember}
+                                    onChange={() => setRemember(!remember)}
+                                    id="remember-me"
+                                />
+                            </div>
+                            <label
+                                htmlFor="remember-me"
+                                className="text-sm text-white/80 cursor-pointer hover:text-white transition-colors"
+                                onClick={() => setRemember(!remember)}
+                            >
+                                Lembrar-me
+                            </label>
                         </div>
-                        <label
-                            htmlFor="remember-me"
-                            className="text-sm text-white/80 cursor-pointer hover:text-white transition-colors"
-                            onClick={() => setRemember(!remember)}
-                        >
-                            Lembrar-me
-                        </label>
+                        <a href="#" className="text-sm text-white/80 hover:text-white transition-colors">
+                            Recuperar Senha?
+                        </a>
                     </div>
-                    <a href="#" className="text-sm text-white/80 hover:text-white transition-colors">
-                        Recuperar Senha?
-                    </a>
-                </div>
+                )}
 
                 <button
                     type="submit"
@@ -213,7 +259,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                             : 'bg-primary hover:bg-primary/90'
                         } text-white font-medium transition-all duration-200 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-primary/20 hover:shadow-primary/40`}
                 >
-                    {isSubmitting ? 'Acessando...' : 'Acessar B2X'}
+                    {isSubmitting 
+                        ? (isLogin ? 'Acessando...' : 'Criando conta...') 
+                        : (isLogin ? 'Acessar B2X' : 'Criar Conta')
+                    }
                 </button>
             </form>
 
@@ -225,18 +274,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-3">
+                <div className="mt-6 grid grid-cols-2 gap-3">
                     <SocialButton icon={<Chrome size={18} />} name="Chrome" />
                     <SocialButton icon={<Twitter size={18} />} name="X" />
                 </div>
             </div>
-
-            <p className="mt-8 text-center text-sm text-white/60">
-                Não tem conta?{' '}
-                <a href="#" className="font-medium text-white hover:text-accent transition-colors">
-                    Crie sua conta aqui
-                </a>
-            </p>
         </div>
     );
 };
